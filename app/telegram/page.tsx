@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import TeacherAttendanceUI from '@/components/TeacherAttendanceUI';
 
 export default function TelegramMiniApp() {
   const [user, setUser] = useState<any>(null);
@@ -45,6 +46,11 @@ export default function TelegramMiniApp() {
       {/* Render component based on user role */}
       {user.role === 'teacher' ? (
         <TeacherDashboard teacherId={user.id} />
+      ) : (
+        <StudentScheduleView studentId={user.student_profiles[0]?.id} />
+      )}
+      {user.role === 'teacher' ? (
+        <TeacherAttendanceUI teacherId={user.id} />
       ) : (
         <StudentScheduleView studentId={user.student_profiles[0]?.id} />
       )}
