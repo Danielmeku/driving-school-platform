@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function AuthPage() {
+function AuthForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(searchParams.get('mode') === 'signup');
@@ -72,90 +72,98 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">
-          {isSignUp ? 'Register Your Driving School' : 'Administrator Login'}
-        </h2>
-        <p className="text-xs text-slate-500 mb-6">
-          {isSignUp
-            ? 'Set up your school account to manage teachers and practical logs.'
-            : 'Access your administrative control panel.'}
-        </p>
+    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+      <h2 className="text-2xl font-bold text-slate-800 mb-2">
+        {isSignUp ? 'Register Your Driving School' : 'Administrator Login'}
+      </h2>
+      <p className="text-xs text-slate-500 mb-6">
+        {isSignUp
+          ? 'Set up your school account to manage teachers and practical logs.'
+          : 'Access your administrative control panel.'}
+      </p>
 
-        {errorMsg && <p className="text-xs text-red-500 bg-red-50 p-2 rounded mb-4">{errorMsg}</p>}
+      {errorMsg && <p className="text-xs text-red-500 bg-red-50 p-2 rounded mb-4">{errorMsg}</p>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <>
-              <div>
-                <label className="text-xs font-bold text-slate-600 uppercase">School Name</label>
-                <input
-                  type="text"
-                  required
-                  value={schoolName}
-                  onChange={(e) => setSchoolName(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded-lg text-sm"
-                  placeholder="e.g. City Driving School"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-600 uppercase">Phone Number</label>
-                <input
-                  type="text"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded-lg text-sm"
-                  placeholder="+251..."
-                />
-              </div>
-            </>
-          )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {isSignUp && (
+          <>
+            <div>
+              <label className="text-xs font-bold text-slate-600 uppercase">School Name</label>
+              <input
+                type="text"
+                required
+                value={schoolName}
+                onChange={(e) => setSchoolName(e.target.value)}
+                className="w-full mt-1 p-2 border rounded-lg text-sm"
+                placeholder="e.g. City Driving School"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-600 uppercase">Phone Number</label>
+              <input
+                type="text"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full mt-1 p-2 border rounded-lg text-sm"
+                placeholder="+251..."
+              />
+            </div>
+          </>
+        )}
 
-          <div>
-            <label className="text-xs font-bold text-slate-600 uppercase">Email Address</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 p-2 border rounded-lg text-sm"
-              placeholder="admin@drivingschool.com"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-slate-600 uppercase">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full mt-1 p-2 border rounded-lg text-sm"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all text-sm"
-          >
-            {loading ? 'Processing...' : isSignUp ? 'Create School Account' : 'Sign In'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-xs text-slate-500">
-          {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-blue-600 font-bold hover:underline ml-1"
-          >
-            {isSignUp ? 'Log In' : 'Register School'}
-          </button>
+        <div>
+          <label className="text-xs font-bold text-slate-600 uppercase">Email Address</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full mt-1 p-2 border rounded-lg text-sm"
+            placeholder="admin@drivingschool.com"
+          />
         </div>
+
+        <div>
+          <label className="text-xs font-bold text-slate-600 uppercase">Password</label>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full mt-1 p-2 border rounded-lg text-sm"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all text-sm"
+        >
+          {loading ? 'Processing...' : isSignUp ? 'Create School Account' : 'Sign In'}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center text-xs text-slate-500">
+        {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+        <button
+          onClick={() => setIsSignUp(!isSignUp)}
+          className="text-blue-600 font-bold hover:underline ml-1"
+        >
+          {isSignUp ? 'Log In' : 'Register School'}
+        </button>
       </div>
+    </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <Suspense fallback={<div className="text-slate-500 text-sm">Loading authentication form...</div>}>
+        <AuthForm />
+      </Suspense>
     </div>
   );
 }
