@@ -47,7 +47,7 @@ export default function TelegramMiniApp() {
     setLoading(false);
   }
 
-  // 3. Link account by Phone Number with format normalization & detailed errors
+  // 3. Link account by Phone Number
   async function handleLinkAccount(e: React.FormEvent) {
     e.preventDefault();
     setLinkingError('');
@@ -61,7 +61,7 @@ export default function TelegramMiniApp() {
 
     const cleanInput = inputPhone.trim();
 
-    // Prepare formats: local (09...) and international (+251...)
+    // Prepare phone format variations (09... and +251...)
     const formattedLocal = cleanInput.startsWith('+251')
       ? '0' + cleanInput.slice(4)
       : cleanInput;
@@ -69,7 +69,6 @@ export default function TelegramMiniApp() {
       ? '+251' + cleanInput.slice(1)
       : cleanInput;
 
-    // Search and update matching row
     const { data, error } = await supabase
       .from('users')
       .update({ telegram_id: telegramUser.id })
@@ -146,57 +145,47 @@ export default function TelegramMiniApp() {
     );
   }
 
-  // SCREEN B: Linked Account (Show Teacher or Student Experience)
+  // SCREEN B: Linked Account (Teacher or Student Display)
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
-      <header className="mb-6">
+    <div className="min-h-screen bg-slate-900 text-white p-6 flex flex-col items-center">
+      <header className="mb-6 text-center">
         <h1 className="text-xl font-bold">Welcome, {dbUser.full_name}</h1>
         <p className="text-xs text-blue-400 uppercase font-semibold mt-1">Role: {dbUser.role}</p>
       </header>
 
       {dbUser.role === 'teacher' ? (
-        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
-          <h2 className="text-md font-bold mb-2">Teacher Attendance Scanner</h2>
-          <p className="text-xs text-slate-400 mb-4">Point your camera at the student's QR code.</p>
-          <QrScanner
-             onScanSuccess={async (studentId) => {
-        // Insert attendance record into Supabase
-             const { error } = await supabase.from('attendance_logs').insert({
-                teacher_id: dbUser.id,
-                student_id: studentId,
-                timestamp: new Date().toISOString(),
-             });
-
-             if (!error) alert('Attendance marked successfully!');
-           }}
-         />
-       </div>
+        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full max-w-sm text-center">
+          <h2 className="text-md font-bold mb-2">Teacher Attendance Dashboard</h2>
+          <p className="text-xs text-slate-400">
+            Use the scanner component to record student attendance.
+          </p>
+        </div>
       ) : (
         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-sm text-center shadow-2xl">
-        <h2 className="text-md font-bold mb-1 text-slate-200">Student Digital Pass</h2>
-        <p className="text-xs text-slate-400 mb-6">
-          Show this QR code to your instructor at the start of each practical session.
-        </p>
-
-        {/* QR Code Container */}
-        <div className="bg-white p-4 rounded-xl inline-block shadow-inner mb-4">
-          <QRCodeSVG
-            value={dbUser.id} // Pass student's unique Supabase User ID
-            size={200}
-            level="H" // High error correction level
-            includeMargin={false}
-          />
-        </div>
-
-        <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50 text-left space-y-1 text-xs">
-          <p className="text-slate-400">
-            <strong className="text-slate-300">Student Name:</strong> {dbUser.full_name}
+          <h2 className="text-md font-bold mb-1 text-slate-200">Student Digital Pass</h2>
+          <p className="text-xs text-slate-400 mb-6">
+            Show this QR code to your instructor at the start of each practical session.
           </p>
-          <p className="text-slate-400">
-            <strong className="text-slate-300">Phone:</strong> {dbUser.phone_number}
-          </p>
+
+          <div className="bg-white p-4 rounded-xl inline-block shadow-inner mb-4">
+            <QRCodeSVG
+              value={dbUser.id}
+              size={200}
+              level="H"
+              includeMargin={false}
+            />
+          </div>
+
+          <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50 text-left space-y-1 text-xs">
+            <p className="text-slate-400">
+              <strong className="text-slate-300">Student Name:</strong> {dbUser.full_name}
+            </p>
+            <p className="text-slate-400">
+              <strong className="text-slate-300">Phone:</strong> {dbUser.phone_number}
+            </p>
+          </div>
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
+}
