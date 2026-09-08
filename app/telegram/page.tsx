@@ -154,10 +154,22 @@ export default function TelegramMiniApp() {
       </header>
 
       {dbUser.role === 'teacher' ? (
-        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-          <h2 className="text-md font-bold mb-2">Teacher Dashboard</h2>
-          <p className="text-xs text-slate-400">Scan student QR codes to mark daily practical attendance.</p>
-        </div>
+        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+          <h2 className="text-md font-bold mb-2">Teacher Attendance Scanner</h2>
+          <p className="text-xs text-slate-400 mb-4">Point your camera at the student's QR code.</p>
+          <QrScanner
+             onScanSuccess={async (studentId) => {
+        // Insert attendance record into Supabase
+             const { error } = await supabase.from('attendance_logs').insert({
+                teacher_id: dbUser.id,
+                student_id: studentId,
+                timestamp: new Date().toISOString(),
+             });
+
+             if (!error) alert('Attendance marked successfully!');
+           }}
+         />
+       </div>
       ) : (
         <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
           <h2 className="text-md font-bold mb-2">Student Digital Pass</h2>
