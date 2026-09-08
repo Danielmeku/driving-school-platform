@@ -172,11 +172,31 @@ export default function TelegramMiniApp() {
          />
        </div>
       ) : (
-        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
-          <h2 className="text-md font-bold mb-2">Student Digital Pass</h2>
-          <p className="text-xs text-slate-400 mb-4">Show this QR code to your teacher at each practical session.</p>
+        <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-sm text-center shadow-2xl">
+        <h2 className="text-md font-bold mb-1 text-slate-200">Student Digital Pass</h2>
+        <p className="text-xs text-slate-400 mb-6">
+          Show this QR code to your instructor at the start of each practical session.
+        </p>
+
+        {/* QR Code Container */}
+        <div className="bg-white p-4 rounded-xl inline-block shadow-inner mb-4">
+          <QRCodeSVG
+            value={dbUser.id} // Pass student's unique Supabase User ID
+            size={200}
+            level="H" // High error correction level
+            includeMargin={false}
+          />
         </div>
-      )}
-    </div>
-  );
-}
+
+        <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50 text-left space-y-1 text-xs">
+          <p className="text-slate-400">
+            <strong className="text-slate-300">Student Name:</strong> {dbUser.full_name}
+          </p>
+          <p className="text-slate-400">
+            <strong className="text-slate-300">Phone:</strong> {dbUser.phone_number}
+          </p>
+        </div>
+      </div>
+    )}
+  </div>
+);
