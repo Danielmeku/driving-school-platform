@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function TelegramMiniApp() {
   const [telegramUser, setTelegramUser] = useState<any>(null);
