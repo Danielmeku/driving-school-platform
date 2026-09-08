@@ -125,7 +125,7 @@ export default function TelegramMiniApp() {
               <input
                 type="text"
                 required
-                placeholder="e.g. 0912121212 or +251..."
+                placeholder="e.g. 09... or +2519..."
                 value={inputPhone}
                 onChange={(e) => setInputPhone(e.target.value)}
                 className="w-full mt-1 p-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
