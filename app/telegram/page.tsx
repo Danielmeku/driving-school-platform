@@ -38,7 +38,7 @@ export default function TelegramMiniApp() {
       .from('users')
       .select('*, student_profiles(*)')
       .eq('telegram_id', tgId)
-      .single();
+      .maybeSingle();
 
     if (data) {
       setDbUser(data);
@@ -46,7 +46,7 @@ export default function TelegramMiniApp() {
     setLoading(false);
   }
 
-  // 3. Link account by Phone Number
+  // 3. Link account by Phone Number with format normalization & detailed errors
   async function handleLinkAccount(e: React.FormEvent) {
     e.preventDefault();
     setLinkingError('');
@@ -58,21 +58,36 @@ export default function TelegramMiniApp() {
       return;
     }
 
-    // Format phone query (matches input with database)
+    const cleanInput = inputPhone.trim();
+
+    // Prepare formats: local (09...) and international (+251...)
+    const formattedLocal = cleanInput.startsWith('+251')
+      ? '0' + cleanInput.slice(4)
+      : cleanInput;
+    const formattedIntl = cleanInput.startsWith('0')
+      ? '+251' + cleanInput.slice(1)
+      : cleanInput;
+
+    // Search and update matching row
     const { data, error } = await supabase
       .from('users')
       .update({ telegram_id: telegramUser.id })
-      .eq('phone_number', inputPhone.trim())
+      .or(`phone_number.eq.${cleanInput},phone_number.eq.${formattedLocal},phone_number.eq.${formattedIntl}`)
       .select('*, student_profiles(*)')
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
+      setLinkingError(`Database error: ${error.message}`);
+      setIsLinking(false);
+      return;
+    }
+
+    if (!data) {
       setLinkingError(
-        'Phone number not found in school database. Please contact school admin to onboard you first.'
+        'Phone number not found in school database. Verify the exact phone number registered on the admin dashboard.'
       );
       setIsLinking(false);
     } else {
-      // Successfully linked!
       setDbUser(data);
       setIsLinking(false);
     }
@@ -110,7 +125,7 @@ export default function TelegramMiniApp() {
               <input
                 type="text"
                 required
-                placeholder="e.g. 0911234567 or +251..."
+                placeholder="e.g. 0912121212 or +251..."
                 value={inputPhone}
                 onChange={(e) => setInputPhone(e.target.value)}
                 className="w-full mt-1 p-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
@@ -142,13 +157,11 @@ export default function TelegramMiniApp() {
         <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
           <h2 className="text-md font-bold mb-2">Teacher Dashboard</h2>
           <p className="text-xs text-slate-400">Scan student QR codes to mark daily practical attendance.</p>
-          {/* QR Scanner Component goes here */}
         </div>
       ) : (
         <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
           <h2 className="text-md font-bold mb-2">Student Digital Pass</h2>
           <p className="text-xs text-slate-400 mb-4">Show this QR code to your teacher at each practical session.</p>
-          {/* Student QR Code Generator goes here */}
         </div>
       )}
     </div>
